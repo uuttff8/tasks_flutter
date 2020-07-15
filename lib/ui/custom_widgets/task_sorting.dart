@@ -1,6 +1,11 @@
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:tasks_flutter/model/task_list.dart';
 import 'package:tasks_flutter/ui/core_ui/exts.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import '../../strings.dart' as str;
 
 class TasksSettings extends StatelessWidget {
   const TasksSettings({Key key}) : super(key: key);
@@ -101,17 +106,43 @@ class _SettingsTaskLists extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return SizedBox(
+      height: 158,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 16.0, top: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              "Task Lists",
+              style: TextStyle(fontSize: 18, color: TasksColors.textColor),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0, left: 16.0),
+              child: _TaskListsSettings(),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TaskListsSettings extends StatelessWidget {
+  const _TaskListsSettings({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     void _createListDialog() {
       showCupertinoDialog(
         context: context,
         builder: (BuildContext context) {
           return CupertinoAlertDialog(
+            title: Text("Name your new task list"),
             content: Column(
               children: <Widget>[
-                Text(
-                  "Name your new task list",
-                  style: TextStyle(fontSize: 16),
-                ),
                 SizedBox(height: 16),
                 CupertinoTextField(),
               ],
@@ -136,79 +167,104 @@ class _SettingsTaskLists extends StatelessWidget {
       );
     }
 
-    return SizedBox(
-      height: 158,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 16.0, top: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              "Task Lists",
-              style: TextStyle(fontSize: 18, color: TasksColors.textColor),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0, left: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  SizedBox(
-                    height: 65,
-                    child: ListView.builder(
-                      itemBuilder: (BuildContext context, int index) {
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 4.0),
-                          child: Text(
-                            "123123",
-                            style: TextStyle(
-                              color: TasksColors.description_text,
-                            ),
+    void _createListSettingsDialog(int index, Box<TaskListHive> box) {
+      showCupertinoModalPopup(
+        context: context,
+        builder: (BuildContext context) {
+          return CupertinoActionSheet(
+            actions: <Widget>[
+              CupertinoActionSheetAction(
+                isDestructiveAction: true,
+                child: Text("Delete"),
+                onPressed: () {
+                  box.deleteAt(index);
+                  Navigator.pop(context);
+                },
+              )
+            ],
+          );
+        },
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        SizedBox(
+          height: 65,
+          child: ValueListenableBuilder(
+            valueListenable:
+                Hive.box<TaskListHive>(str.hiveTaskLists).listenable(),
+            builder:
+                (BuildContext context, Box<TaskListHive> box, Widget widget) {
+              return ListView.builder(
+                itemBuilder: (BuildContext context, int index) {
+                  TaskListHive list = box.values.elementAt(index);
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 4.0, right: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      // crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          "${list.name}",
+                          style: TextStyle(
+                            color: TasksColors.description_text,
                           ),
-                        );
-                      },
-                      itemCount: 3,
+                        ),
+                        InkWell(
+                          child: Icon(
+                            Icons.more_horiz,
+                            color: TasksColors.description_text,
+                          ),
+                          onTap: () {
+                            _createListSettingsDialog(index, box);
+                          },
+                        )
+                      ],
+                    ),
+                  );
+                },
+                itemCount: box.values.length,
+              );
+            },
+          ),
+        ),
+        InkWell(
+          onTap: _createListDialog,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                flex: 8,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    "Create List",
+                    style: TextStyle(
+                      color: TasksColors.description_text,
                     ),
                   ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Expanded(
-                        flex: 8,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: InkWell(
-                            child: Text(
-                              "Create List",
-                              style: TextStyle(
-                                color: TasksColors.description_text,
-                              ),
-                            ),
-                            onTap: _createListDialog,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: InkWell(
-                            child: Icon(
-                              Icons.add,
-                              color: TasksColors.description_text,
-                              size: 20,
-                            ),
-                            onTap: () {},
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                ],
+                ),
               ),
-            )
-          ],
+              Expanded(
+                flex: 1,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: InkWell(
+                    child: Icon(
+                      Icons.add,
+                      color: TasksColors.description_text,
+                      size: 20,
+                    ),
+                    onTap: () {},
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }
@@ -238,7 +294,40 @@ class _SettingsDoneTasks extends StatelessWidget {
                     color: Colors.yellow,
                   ),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  // tasks settings should be dissmised
+                  Navigator.pop<bool>(context);
+
+                  showCupertinoDialog<bool>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return CupertinoAlertDialog(
+                        title: Text("Delete done tasks?"),
+                        content: Text(
+                            "All done tasks will be deleted without the ability to remove"),
+                        actions: <Widget>[
+                          CupertinoDialogAction(
+                            child: Text('Cancel'),
+                            isDestructiveAction: true,
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                          CupertinoDialogAction(
+                            child: Text('Continue'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              BotToast.showText(
+                                text: "Done tasks deleted",
+                                contentColor: TasksColors.toast_color,
+                              );
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
               ),
             )
           ],

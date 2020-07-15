@@ -4,8 +4,8 @@ import 'package:hive/hive.dart';
 import 'package:tasks_flutter/model/task.dart';
 import 'package:tasks_flutter/ui/core_ui/exts.dart';
 
-class TaskList extends StatelessWidget {
-  const TaskList({
+class TaskListFirst extends StatelessWidget {
+  const TaskListFirst({
     Key key,
     @required this.box,
   }) : super(key: key);

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:tasks_flutter/model/task.dart';
+import 'package:tasks_flutter/model/task_list.dart';
 import 'package:tasks_flutter/ui/custom_widgets/tasks_toolbar.dart';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:hive/hive.dart';
@@ -13,9 +15,14 @@ void main() async {
   await Hive.initFlutter();
 
   Hive.registerAdapter(TaskHiveAdapter());
+  Hive.registerAdapter(TaskListHiveAdapter());
 
   await Hive.openBox<TaskHive>(str.hiveTasks);
-  await Hive.openBox(str.hiveTaskLists);
+  await Hive.openBox<TaskListHive>(str.hiveTaskLists);
+
+  // Hive.box<TaskListHive>(str.hiveTaskLists).add(TaskListHive(
+  //     name: "Work",
+  //     tasks: [TaskHive(name: "asdasd", description: "123123019283")]));
 
   runApp(TasksFlutter());
 }
@@ -44,9 +51,12 @@ class TasksFlutter extends StatelessWidget {
       navigatorObservers: [BotToastNavigatorObserver()],
       debugShowCheckedModeBanner: false,
       // showSemanticsDebugger: true,
-      home: Scaffold(
-        resizeToAvoidBottomPadding: false,
-        body: TabbedWidgets(),
+      home: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle(statusBarBrightness: Brightness.dark),
+        child: Scaffold(
+          resizeToAvoidBottomPadding: false,
+          body: TabbedWidgets(),
+        ),
       ),
     );
   }

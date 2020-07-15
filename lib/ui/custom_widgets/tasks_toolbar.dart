@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tasks_flutter/ui/core_ui/tasks_text_modal_bottom_sheet.dart';
 
 import 'package:tasks_flutter/ui/custom_widgets/new_task/new_task.dart';
+import 'package:tasks_flutter/ui/custom_widgets/settings/settings_screen.dart';
 import 'package:tasks_flutter/ui/custom_widgets/task_sorting.dart';
 
 class TabbedWidgets extends StatelessWidget {
@@ -66,6 +67,15 @@ class TasksBottomBar extends StatelessWidget {
       );
     }
 
+    void _tapSettingsButton() {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (BuildContext context) => SettingsScreen(),
+        ),
+      );
+    }
+
     return Container(
       height: bottomBarHeight,
       color: TasksColors.mainBlack,
@@ -93,7 +103,7 @@ class TasksBottomBar extends StatelessWidget {
               ),
             ),
             InkWell(
-              onTap: () {},
+              onTap: _tapSettingsButton,
               child: FaIcon(
                 FontAwesomeIcons.cog,
                 color: TasksColors.iconWhite,

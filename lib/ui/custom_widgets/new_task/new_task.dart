@@ -120,20 +120,55 @@ class TasksTextTextFieldSmall extends StatelessWidget {
           ),
           Expanded(
             flex: 1,
-            child: InkWell(
-              child: Ink(
-                child: FaIcon(
-                  FontAwesomeIcons.ellipsisH,
-                  size: 24,
-                  color: Colors.white,
-                ),
-                color: Colors.white,
-              ),
-              onTap: () {},
-            ),
+            child: PopupThreeDotsButton(),
           )
         ],
       ),
+    );
+  }
+}
+
+class PopupThreeDotsButton extends StatefulWidget {
+  const PopupThreeDotsButton({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  _PopupThreeDotsButtonState createState() => _PopupThreeDotsButtonState();
+}
+
+class _PopupThreeDotsButtonState extends State<PopupThreeDotsButton> {
+  String _selection;
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<String>(
+      onSelected: (String value) {
+        setState(() {
+          _selection = value;
+        });
+      },
+      child: FaIcon(
+        FontAwesomeIcons.ellipsisH,
+        size: 24,
+        color: Colors.white,
+      ),
+      itemBuilder: (BuildContext context) {
+        return <PopupMenuEntry<String>>[
+          const PopupMenuItem<String>(
+            value: 'Value1',
+            child: Text('Choose value 1'),
+          ),
+          const PopupMenuItem<String>(
+            value: 'Value2',
+            child: Text('Choose value 2'),
+          ),
+          const PopupMenuItem<String>(
+            value: 'Value3',
+            child: Text('Choose value 3'),
+          ),
+        ];
+      },
     );
   }
 }
